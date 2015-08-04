@@ -305,8 +305,10 @@ function InterimElementProvider() {
 
         if (options.closeAll) {
           return $q.all(stack.map(closeElement));
+        } else if (options.closeTo !== undefined) {
+          return $q.all(stack.splice(options.closeTo).map(closeElement));
         } else {
-          var interim = stack.shift();
+          var interim = stack.pop();
           return closeElement(interim);
         }
 

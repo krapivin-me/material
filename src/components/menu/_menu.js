@@ -135,7 +135,7 @@ angular.module('material.components.menu', [
  *
  */
 
-function MenuDirective($mdMenu, $mdUtil) {
+function MenuDirective($mdMenu, $mdUtil, $timeout) {
   return {
     restrict: 'E',
     require: 'mdMenu',
@@ -157,11 +157,14 @@ function MenuDirective($mdMenu, $mdUtil) {
     }
 
     var nestedMenus = templateElement[0].querySelectorAll('md-menu');
+    var nestingDepth = parseInt(templateElement[0].getAttribute('md-nest-level'), 10) || 0;
     if (nestedMenus) {
       angular.forEach($mdUtil.nodesToArray(nestedMenus), function(menuEl) {
         if (!menuEl.hasAttribute('md-position-mode')) {
           menuEl.setAttribute('md-position-mode', 'cascade');
         }
+        menuEl.classList.add('md-nested-menu');
+        menuEl.setAttribute('md-nest-level', nestingDepth + 1);
       });
     }
     return link;
@@ -184,10 +187,10 @@ function MenuDirective($mdMenu, $mdUtil) {
   }
 }
 
-function MenuController($mdMenu, $attrs, $element, $scope) {
+function MenuController($mdMenu, $attrs, $element, $scope, $mdUtil, $timeout) {
 
   var menuContainer;
-  var ctrl = this;
+  var self = this;
   this.containerProxies = [];
   var triggerElement;
 
@@ -196,18 +199,52 @@ function MenuController($mdMenu, $attrs, $element, $scope) {
   this.init = function(setMenuContainer) {
     menuContainer = setMenuContainer;
     triggerElement = $element[0].querySelector('[ng-click]');
+
+    this.nestedMenus = $mdUtil.nodesToArray(menuContainer[0].querySelectorAll('.md-nested-menu'));
+    if (this.nestedMenus.length) {
+      this.enableNesting();
+    }
+  };
+
+  this.enableNesting = function() {
+    $scope.$on('$mdMenuOpen', function(event, el) {
+      if (menuContainer[0].contains(el[0])) {
+        self.currentlyOpenMenu = el.controller('mdMenu');
+        //self.currentlyOpenMenu.registerContainerProxy(self.handleKeyDown.bind(self));
+      }
+    });
+    $scope.$on('$mdMenuClose', function(event, el) {
+      if (menuContainer[0].contains(el[0])) {
+        self.currentlyOpenMenu = undefined;
+      }
+    });
+
+    var menuItems = angular.element($mdUtil.nodesToArray(menuContainer[0].querySelectorAll('md-menu-item')));
+    var openMenuTimeout;
+    menuItems.on('mouseenter', function(event) {
+      openMenuTimeout = $timeout(function() {
+        if (self.currentlyOpenMenu) {
+          var closeTo = (parseInt($attrs.mdNestLevel, 10) || 0) + 1;
+          self.currentlyOpenMenu.close(true, closeTo);
+        }
+        var nestedMenu;
+        if (nestedMenu = (event.target.querySelector('md-menu') || $mdUtil.getClosest(event.target, 'MD-MENU'))) {
+          angular.element(nestedMenu).controller('mdMenu').open();
+        }
+      }, 100);
+    });
   };
 
   // Uses the $mdMenu interim element service to open the menu contents
   this.open = function openMenu(ev) {
     ev && ev.stopPropagation();
-
-    ctrl.isOpen = true;
+    if (self.isOpen) return;
+    self.isOpen = true;
     triggerElement.setAttribute('aria-expanded', 'true');
     $scope.$emit('$mdMenuOpen', $element);
     $mdMenu.show({
       scope: $scope,
-      mdMenuCtrl: ctrl,
+      mdMenuCtrl: self,
       element: menuContainer,
       target: $element[0]
     });
@@ -215,8 +252,8 @@ function MenuController($mdMenu, $attrs, $element, $scope) {
   // Expose a open function to the child scope for html to use
   $scope.$mdOpenMenu = this.open;
 
-  $scope.$watch(function() { return ctrl.isOpen; }, function() {
-    $scope.$mdMenuIsOpen = ctrl.isOpen;
+  $scope.$watch(function() { return self.isOpen; }, function() {
+    $scope.$mdMenuIsOpen = self.isOpen;
   });
 
   this.focusMenuContainer = function focusMenuContainer() {
@@ -236,12 +273,12 @@ function MenuController($mdMenu, $attrs, $element, $scope) {
   };
 
   // Use the $mdMenu interim element service to close the menu contents
-  this.close = function closeMenu(skipFocus) {
-    if ( !ctrl.isOpen ) return;
+  this.close = function closeMenu(skipFocus, toLevel) {
+    if ( !self.isOpen ) return;
 
-    ctrl.isOpen = false;
+    self.isOpen = false;
     triggerElement.setAttribute('aria-expanded', 'false');
-    $mdMenu.hide(null, { closeAll: true });
+    $mdMenu.hide(null, { closeTo: toLevel });
 
     $scope.$emit('$mdMenuClose', $element);
 

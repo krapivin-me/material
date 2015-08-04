@@ -133,7 +133,7 @@ function MenuProvider($$interimElementProvider) {
           e.preventDefault();
           e.stopPropagation();
           scope.$apply(function() {
-            opts.mdMenuCtrl.close(true);
+            opts.mdMenuCtrl.close(true, { closeAll: true });
           });
         });
 

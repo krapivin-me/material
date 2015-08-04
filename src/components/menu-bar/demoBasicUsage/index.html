@@ -91,12 +91,42 @@
           Format
         </button>
         <md-menu-content>
-          <md-menu-item md-hotkey="M-B"><md-button ng-click="ctrl.toggleSetting('bold')">Bold</md-button></md-menu-item>
-          <md-menu-item md-hotkey="M-I"><md-button ng-click="ctrl.toggleSetting('italic')">Italic</md-button></md-menu-item>
-          <md-menu-item md-hotkey="M-U"><md-button ng-click="ctrl.toggleSetting('underline')">Underline</md-button></md-menu-item>
-          <md-menu-item md-hotkey="A-S-5"><md-button ng-click="ctrl.toggleSetting('strikethrough')">Strikethrough</md-button></md-menu-item>
-          <md-menu-item md-hotkey="M-."><md-button ng-click="ctrl.toggleSetting('superscript')">Superscript</md-button></md-menu-item>
-          <md-menu-item md-hotkey="M-,"><md-button ng-click="ctrl.toggleSetting('subscript')">Subscript</md-button></md-menu-item>
+          <md-menu-item>
+            <md-button ng-click="ctrl.toggleSetting('bold')">
+              Bold
+              <span class="md-alt-text"> {{ 'M-B' | keyboardShortcut }}</span>
+            </md-button>
+          </md-menu-item>
+          <md-menu-item>
+            <md-button ng-click="ctrl.toggleSetting('italic')">
+              Italic
+              <span class="md-alt-text">{{ 'M-I' | keyboardShortcut }}</span>
+            </md-button>
+          </md-menu-item>
+          <md-menu-item>
+            <md-button ng-click="ctrl.toggleSetting('underline')">
+              Underline
+              <span class="md-alt-text">{{ 'M-U' | keyboardShortcut }}</span>
+            </md-button>
+          </md-menu-item>
+          <md-menu-item>
+            <md-button ng-click="ctrl.toggleSetting('strikethrough')">
+              Strikethrough
+              <span class="md-alt-text">{{ 'A-S-5' | keyboardShortcut }}</span>
+            </md-button>
+          </md-menu-item>
+          <md-menu-item>
+            <md-button ng-click="ctrl.toggleSetting('superscript')">
+              Superscript
+              <span class="md-alt-text">{{ 'M-.' | keyboardShortcut }}</span>
+            </md-button>
+          </md-menu-item>
+          <md-menu-item>
+            <md-button ng-click="ctrl.toggleSetting('subscript')">
+              Subscript
+              <span class="md-alt-text">{{ 'M-,' | keyboardShortcut }}</span>
+            </md-button>
+          </md-menu-item>
           <md-menu-divider></md-menu-divider>
           <md-menu-item>
             <md-menu>
@@ -139,7 +169,7 @@
             </md-menu>
           </md-menu-item>
           <md-menu-divider></md-menu-divider>
-          <md-menu-item md-hotkey="M-/"><md-button ng-click="ctrl.toggleSetting('clearFormatting')">Clear Formatting</md-button></md-menu-item>
+          <md-menu-item><md-button ng-click="ctrl.toggleSetting('clearFormatting')">Clear Formatting</md-button></md-menu-item>
         </md-menu-content>
       </md-menu>
       <md-menu>
